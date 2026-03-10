@@ -28,7 +28,34 @@ public class OSKernel {
     }
 
     public void boot() {
-        // TODO: implement boot logic
+        System.out.println("Booting OS...");
+
+        processTable = new ArrayList<>();
+
+        readyQueue = new ReadyQueue();
+        blockedQueue = new BlockedQueue();
+
+        int[] cells = new int[1024];
+        RAM ram = new RAM(1024, cells);
+
+        memoryManager = new MemoryManager(ram);
+
+        cpu = new CPU(null, 0);
+
+        scheduler = new XScheduler(5);
+
+        fileSystem = new FileSystem();
+
+        ioManager = new IOManager();
+
+        System.out.println("OS boot completed.");
+
+        ioManager.addDevice(new DiskDevice("disk"));
+
+        createProcess("idle",0);
+        createProcess("system_task",0);
+
+        System.out.println("OS boot completed.");
     }
 
     public int createProcess(String programName, int priority) {

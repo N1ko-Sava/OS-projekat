@@ -1,8 +1,8 @@
-public class DiskDevice extends IODevice {
+public class ConsoleDevice extends IODevice {
 
     private boolean busy;
 
-    public DiskDevice(String name) {
+    public ConsoleDevice(String name) {
         super(name);
         this.busy = false;
     }
@@ -10,8 +10,7 @@ public class DiskDevice extends IODevice {
     @Override
     public void startOperation(IOOperation op, PCB p) {
         busy = true;
-        System.out.println("Process " + p.getPid() + " started Disk IO: " + op.getType());
-        // Za sada simuliramo odmah završetak
+        System.out.println("Process " + p.getPid() + " started Console IO: " + op.getType());
         busy = false;
     }
 
