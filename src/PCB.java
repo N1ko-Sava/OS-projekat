@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +14,13 @@ public class PCB {
     private int baseAddress;
     private int limit;
     private List<OpenFileHandle> openFiles;
+
+    public PCB() {
+
+        this.programCounter = 0;
+        this.registers = new HashMap<>();
+        this.openFiles = new ArrayList<>();
+    }
 
     public PCB(int pid, ProcessState state, int priority, int programCounter,
                Map<String, Integer> registers, int baseAddress, int limit, List<OpenFileHandle> openFiles

@@ -20,15 +20,8 @@ public class OSKernel {
         nextPid = 1;
     }
 
-    public class Main {
-        public static void main(String[] args) {
-            OSKernel kernel = new OSKernel();
-            kernel.boot();
-        }
-    }
-
     public void boot() {
-        System.out.println("Booting OS...");
+        System.out.println("\t --- Booting OS... --- \t");
 
         processTable = new ArrayList<>();
 
@@ -48,19 +41,39 @@ public class OSKernel {
 
         ioManager = new IOManager();
 
-        System.out.println("OS boot completed.");
+
 
         ioManager.addDevice(new DiskDevice("disk"));
 
         createProcess("idle",0);
         createProcess("system_task",0);
 
-        System.out.println("OS boot completed.");
+        System.out.println("\t --- OS booted  --- \t");
     }
 
     public int createProcess(String programName, int priority) {
-        // TODO: implement process creation
-        return -1;
+        PCB pcb = new PCB();
+
+        pcb.setPid(nextPid++);
+        pcb.setState(ProcessState.READY);
+        pcb.setPriority(priority);
+        pcb.setProgramCounter(0);
+        pcb.setLimit(64);
+
+        boolean allocated = memoryManager.allocate(pcb, 64);
+
+        if (!allocated) {
+            System.out.println("Not enough memory for process " + programName);
+            return -1;
+        }
+
+        processTable.add(pcb);
+        readyQueue.add(pcb);
+
+        System.out.println("Process created: PID=" + pcb.getPid() + " (" + programName + ")");
+
+        return pcb.getPid();
+
     }
 
     public void terminateProcess(int pid) {
