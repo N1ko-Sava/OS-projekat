@@ -1,26 +1,32 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlockedQueue {
-
     private List<PCB> list;
 
-    public void block(PCB p)
-    {
-        //uradi nesto
+    public BlockedQueue() {
+        this.list = new ArrayList<>();
     }
 
-    public void unblock(PCB p)
-    {
-        //uradi nesto
+    // Metoda za blokiranje procesa
+    public void block(PCB p) {
+        if (!list.contains(p)) {
+            list.add(p);
+            p.setState(ProcessState.WAITING);
+        }
+    }
+
+    // Metoda za odblokiranje procesa
+    public void unblock(PCB p) {
+        if (list.remove(p)) {
+            p.setState(ProcessState.READY);
+        }
     }
 
 
-    public List<PCB> findByDevice(IODevice d)
-    {
-        return null;
-        //nesto uradi
+    public List<PCB> findByDevice(IODevice d) {
+        List<PCB> result = new ArrayList<>();
+
+        return result;
     }
-
-
-
 }
