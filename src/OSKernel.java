@@ -148,8 +148,19 @@ public class OSKernel {
         cpu.executeOneStep();
     }
 
-    public void handleIOCompletion(IODevice device) {
-        // TODO
+    public void handleIOCompletion(PCB pcb) {
+
+        if (pcb == null) {
+            return;
+        }
+
+        if (pcb.getState() == ProcessState.WAITING) {
+            unblockProcess(pcb);
+
+            System.out.println(
+                    "IO zavrsen za proces PID=" + pcb.getPid()
+            );
+        }
     }
 
     public void syscall(Syscall request) {

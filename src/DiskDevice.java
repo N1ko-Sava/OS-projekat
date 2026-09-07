@@ -1,22 +1,24 @@
 public class DiskDevice extends IODevice {
 
-    private boolean busy;
-
     public DiskDevice(String name) {
         super(name);
-        this.busy = false;
     }
 
     @Override
     public void startOperation(IOOperation op, PCB p) {
-        busy = true;
-        System.out.println("Process " + p.getPid() + " started Disk IO: " + op.getType());
-        // Za sada simuliramo odmah završetak
-        busy = false;
-    }
 
-    @Override
-    public boolean isBusy() {
-        return busy;
+        if (busy) {
+            return;
+        }
+
+        busy = true;
+        currentProcess = p;
+        currentOperation = op;
+
+        System.out.println(
+                "Proces PID=" + p.getPid()
+                        + " je zapoceo Disk IO: "
+                        + op.getType()
+        );
     }
 }

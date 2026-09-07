@@ -13,18 +13,29 @@ public class IOManager {
         devices.add(device);
     }
 
-    public void requestIO(PCB p, String deviceName, IOOperation op)
-    {
+    public void requestIO(PCB p, String deviceName, IOOperation op) {
+
+        if (p == null || op == null) {
+            return;
+        }
+
         for (IODevice d : devices) {
 
             if (d.getName().equals(deviceName)) {
-                //d.performIO(p, op);
+
+                if (d.isBusy()) {
+                    System.out.println(
+                            "Uredjaj " + deviceName + " je trenutno zauzet."
+                    );
+                    return;
+                }
+
+                d.startOperation(op, p);
                 return;
             }
-
         }
 
-        System.out.println("Device not found: " + deviceName);
+        System.out.println("Uredjaj nije pronadjen: " + deviceName);
     }
 
     public void completeIO(IODevice device)
