@@ -28,8 +28,7 @@ public class OSKernel {
         readyQueue = new ReadyQueue();
         blockedQueue = new BlockedQueue();
 
-        int[] cells = new int[1024];
-        RAM ram = new RAM(1024, cells);
+        RAM ram = new RAM(1024);
 
         memoryManager = new MemoryManager(ram);
 
