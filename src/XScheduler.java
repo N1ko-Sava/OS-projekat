@@ -1,7 +1,5 @@
 public class XScheduler implements Scheduler {
 
-    private int timeQuantum;
-
     @Override
     public PCB chooseNext(ReadyQueue ready) {
 
@@ -10,19 +8,5 @@ public class XScheduler implements Scheduler {
         }
 
         return ready.removeNext(); // FCFS: prvi proces iz reda
-    }
-
-
-    public XScheduler(int timeQuantum) {
-        this.timeQuantum = timeQuantum;
-    }
-
-
-    public int getTimeQuantum() {
-        return timeQuantum;
-    }
-
-    public void setTimeQuantum(int timeQuantum) {
-        this.timeQuantum = timeQuantum;
     }
 }

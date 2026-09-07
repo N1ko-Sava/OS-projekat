@@ -17,10 +17,12 @@ public class BlockedQueue {
     }
 
     // Metoda za odblokiranje procesa
-    public void unblock(PCB p) {
+    public boolean unblock(PCB p) {
         if (list.remove(p)) {
             p.setState(ProcessState.READY);
+            return true;
         }
+        return false;
     }
 
 

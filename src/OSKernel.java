@@ -34,7 +34,7 @@ public class OSKernel {
 
         cpu = new CPU(null, 0);
 
-        scheduler = new XScheduler(5);
+        scheduler = new XScheduler();
 
         fileSystem = new FileSystem();
 
@@ -75,12 +75,77 @@ public class OSKernel {
 
     }
 
-    public void terminateProcess(int pid) {
-        // TODO
+    public void terminateProcess(PCB pcb) {
+
+        if (pcb == null) {
+            return;
+        }
+
+        pcb.setState(ProcessState.TERMINATED);
+
+        if (cpu.getCurrent() == pcb) {
+            cpu.setCurrent(null);
+        }
+
+        memoryManager.free(pcb);
+
+        processTable.remove(pcb);
+
+        System.out.println("Proces PID=" + pcb.getPid() + " je zavrsen.");
     }
 
+
+    public void blockProcess(PCB pcb) {
+        if (pcb == null) {
+            return;
+        }
+
+        // Ako je ovaj proces trenutno na CPU-u, ukloni ga
+        if (cpu.getCurrent() == pcb) {
+            cpu.setCurrent(null);
+        }
+
+        // Prebaci proces u BlockedQueue
+        blockedQueue.block(pcb);
+
+        System.out.println(
+                "Proces PID=" + pcb.getPid() + " je blokiran."
+        );
+    }
+
+
+    public void unblockProcess(PCB pcb) {
+        if (pcb == null) {
+            return;
+        }
+
+        if (blockedQueue.unblock(pcb)) {
+            readyQueue.add(pcb);
+
+            System.out.println(
+                    "Proces PID=" + pcb.getPid() + " je odblokiran."
+            );
+        }
+    }
+
+
     public void timerTick() {
-        // TODO
+
+
+        if (cpu.getCurrent() == null) {
+
+            PCB next = scheduler.chooseNext(readyQueue);
+
+            if (next != null) {
+                cpu.contextSwitch(next);
+            } else {
+                System.out.println("Nema procesa spremnih za izvrsavanje.");
+                return;
+            }
+        }
+
+
+        cpu.executeOneStep();
     }
 
     public void handleIOCompletion(IODevice device) {
