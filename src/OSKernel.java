@@ -163,6 +163,48 @@ public class OSKernel {
         }
     }
 
+    public void completeIO(IODevice device) {
+
+        PCB pcb = ioManager.completeIO(device);
+
+        if (pcb != null) {
+            handleIOCompletion(pcb);
+        }
+    }
+    public void requestIO(PCB pcb, String deviceName, IOOperation op) {
+
+        if (pcb == null || op == null) {
+            return;
+        }
+
+        boolean started = ioManager.requestIO(
+                pcb,
+                deviceName,
+                op
+        );
+
+        if (started) {
+
+            blockProcess(pcb);
+
+            System.out.println(
+                    "Proces PID=" + pcb.getPid()
+                            + " je zatrazio IO na uredjaju: "
+                            + deviceName
+            );
+        }
+    }
+    public PCB findProcess(int pid) {
+        for (PCB pcb : processTable) {
+            if (pcb.getPid() == pid) {
+                return pcb;
+            }
+        }
+
+        return null;
+    }
+
+
     public void syscall(Syscall request) {
         // TODO
     }

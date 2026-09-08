@@ -13,10 +13,10 @@ public class IOManager {
         devices.add(device);
     }
 
-    public void requestIO(PCB p, String deviceName, IOOperation op) {
+    public boolean requestIO(PCB p, String deviceName, IOOperation op) {
 
         if (p == null || op == null) {
-            return;
+            return false;
         }
 
         for (IODevice d : devices) {
@@ -27,19 +27,35 @@ public class IOManager {
                     System.out.println(
                             "Uredjaj " + deviceName + " je trenutno zauzet."
                     );
-                    return;
+                    return false;
                 }
 
                 d.startOperation(op, p);
-                return;
+                return true;
             }
         }
 
         System.out.println("Uredjaj nije pronadjen: " + deviceName);
+        return false;
     }
 
-    public void completeIO(IODevice device)
-    {
-        System.out.println("IO completed on device: " + device.getName());
+    public PCB completeIO(IODevice device) {
+
+        if (device == null || !device.isBusy()) {
+            return null;
+        }
+
+
+
+        // Zapamti proces prije nego sto oslobodimo uredjaj
+        PCB process = device.getCurrentProcess();
+
+        device.completeOperation();
+
+        System.out.println(
+                "IO zavrsen na uredjaju: " + device.getName()
+        );
+
+        return process;
     }
 }
