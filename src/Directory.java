@@ -1,25 +1,36 @@
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Directory {
+public class Directory extends FsNode {
 
     private Map<String, FsNode> children;
-    public void addChild(FsNode node)
-    {
-        //todo
 
+    public Directory(String name, Directory parent) {
+        super(name, parent);
+        children = new LinkedHashMap<>();
     }
 
-    public FsNode getChild(String name)
-    {
-        return null;
-        //todo
+    public void addChild(FsNode node) {
+
+        if (node == null) {
+            return;
+        }
+
+        children.put(node.getName(), node);
+        node.setParent(this);
     }
 
-    public List<FsNode> list()
-    {
-        return null;
-        //todo
+    public FsNode getChild(String name) {
+        return children.get(name);
     }
 
+    public List<FsNode> list() {
+        return new ArrayList<>(children.values());
+    }
+
+    public void removeChild(String name) {
+        children.remove(name);
+    }
 }

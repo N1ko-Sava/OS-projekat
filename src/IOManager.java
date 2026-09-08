@@ -23,6 +23,11 @@ public class IOManager {
 
             if (d.getName().equals(deviceName)) {
 
+                if (d instanceof DiskDevice) {
+                    d.startOperation(op, p);
+                    return true;
+                }
+
                 if (d.isBusy()) {
                     System.out.println(
                             "Uredjaj " + deviceName + " je trenutno zauzet."

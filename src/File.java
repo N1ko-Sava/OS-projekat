@@ -1,25 +1,23 @@
-public class File {
+public class File extends FsNode {
 
     private StringBuilder content;
 
-    public String read(){
+    public File(String name, Directory parent) {
+        super(name, parent);
+        this.content = new StringBuilder();
+    }
+
+    public String read() {
         return content.toString();
-        //PROVJERI
     }
 
-    public void write(String data){
+    public void write(String data) {
 
+        content.setLength(0);
         content.append(data);
-        //PROVJERI
     }
 
-    public void append(String data){
-
+    public void append(String data) {
         content.append(data);
-        //PROVJERI
-    }
-
-    public File(StringBuilder content) {
-        this.content = content;
     }
 }
