@@ -59,6 +59,48 @@ public class MemoryManager {
     public void free(PCB p) {
         segments.removeIf(seg -> seg.getOwner().equals(p));
     }
+    public void defragment() {
+
+        segments.sort((a, b) ->
+                Integer.compare(a.getBase(), b.getBase()));
+
+        int nextFreeAddress = 0;
+
+        for (MemorySegment seg : segments) {
+
+            int oldBase = seg.getBase();
+            int size = seg.getLimit();
+
+            if (oldBase != nextFreeAddress) {
+
+                System.arraycopy(
+                        ram.getCells(),
+                        oldBase,
+                        ram.getCells(),
+                        nextFreeAddress,
+                        size
+                );
+
+                seg.setBase(nextFreeAddress);
+                seg.getOwner().setBaseAddress(nextFreeAddress);
+
+                System.out.println(
+                        "PID=" + seg.getOwner().getPid()
+                                + " pomjeren: "
+                                + oldBase + " -> " + nextFreeAddress
+                );
+            }
+
+            nextFreeAddress += size;
+        }
+
+
+        for (int i = nextFreeAddress; i < ram.getSize(); i++) {
+            ram.write(i, 0);
+        }
+
+        System.out.println("Defragmentacija memorije zavrsena.");
+    }
 
     public int read(PCB p, int address) {
 
