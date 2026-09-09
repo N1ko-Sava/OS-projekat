@@ -36,7 +36,13 @@ public class OSKernel {
 
         scheduler = new XScheduler();
 
-        fileSystem = new FileSystem();
+        ioManager = new IOManager();
+
+        DiskDevice disk = new DiskDevice("disk");
+        ioManager.addDevice(disk);
+
+        fileSystem = new FileSystem(disk);
+
 
         ioManager = new IOManager();
 
@@ -203,6 +209,13 @@ public class OSKernel {
 
         return null;
     }
+
+    public IODevice getDevice(String name) {
+        return ioManager.getDevice(name);
+    }
+
+
+
 
 
     public void syscall(Syscall request) {

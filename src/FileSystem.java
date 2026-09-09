@@ -5,6 +5,7 @@ public class FileSystem {
     private boolean[] freeBlocks;
     private String[] diskBlocks;
 
+    private static final int BLOCK_SIZE = 100;
     private static final int BLOCK_COUNT = 100;
 
     public FileSystem(DiskDevice disk) {
@@ -19,8 +20,6 @@ public class FileSystem {
             diskBlocks[i] = "";
         }
     }
-
-
 
 
 
@@ -176,9 +175,112 @@ public class FileSystem {
             return;
         }
 
+        if (node instanceof File) {
+
+            File file = (File) node;
+
+            for (int block : file.getDataBlocks()) {
+                freeBlock(block);
+            }
+
+            freeBlock(file.getIndexBlock());
+
+            file.clearDataBlocks();
+
+            System.out.println(
+                    "Oslobodjeni disk blokovi fajla: " + path
+            );
+        }
+
         parent.removeChild(node.getName());
 
         System.out.println("Obrisano: " + path);
+    }
+
+    public boolean writeFile(String path, String data) {
+
+        FsNode node = resolve(path);
+
+        if (!(node instanceof File)) {
+            System.out.println("Fajl ne postoji: " + path);
+            return false;
+        }
+
+        File file = (File) node;
+
+        if (data == null) {
+            data = "";
+        }
+
+
+        for (int block : file.getDataBlocks()) {
+            freeBlock(block);
+        }
+
+        file.clearDataBlocks();
+
+        int blocksNeeded =
+                (data.length() + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+        for (int i = 0; i < blocksNeeded; i++) {
+
+            int block = allocateBlock();
+
+            if (block == -1) {
+
+                System.out.println("Nema dovoljno prostora na disku.");
+
+                for (int allocated : file.getDataBlocks()) {
+                    freeBlock(allocated);
+                }
+
+                file.clearDataBlocks();
+                return false;
+            }
+
+            int start = i * BLOCK_SIZE;
+            int end = Math.min(start + BLOCK_SIZE, data.length());
+
+            String part = data.substring(start, end);
+
+            diskBlocks[block] = part;
+
+            file.addDataBlock(block);
+        }
+
+        diskBlocks[file.getIndexBlock()] =
+                file.getDataBlocks().toString();
+
+        file.write(data);
+
+        System.out.println(
+                "Upisano u fajl: " + path
+                        + " | index blok: "
+                        + file.getIndexBlock()
+                        + " | data blokovi: "
+                        + file.getDataBlocks()
+        );
+
+        return true;
+    }
+
+    public String readFile(String path) {
+
+        FsNode node = resolve(path);
+
+        if (!(node instanceof File)) {
+            return null;
+        }
+
+        File file = (File) node;
+
+        StringBuilder result = new StringBuilder();
+
+        for (int block : file.getDataBlocks()) {
+            result.append(diskBlocks[block]);
+        }
+
+        return result.toString();
     }
 
 

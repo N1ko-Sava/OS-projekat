@@ -44,6 +44,17 @@ public class IOManager {
         return false;
     }
 
+    public IODevice getDevice(String name) {
+
+        for (IODevice d : devices) {
+            if (d.getName().equals(name)) {
+                return d;
+            }
+        }
+
+        return null;
+    }
+
     public PCB completeIO(IODevice device) {
 
         if (device == null || !device.isBusy()) {

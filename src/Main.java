@@ -1,42 +1,49 @@
-
- class Main {
+public class Main {
 
     public static void main(String[] args) {
 
         OSKernel kernel = new OSKernel();
         kernel.boot();
 
-        System.out.println("\n--- Pokrenut sistem ---\n");
-
-        int pid = kernel.createProcess("test_program", 0);
-
-        PCB p = kernel.findProcess(pid);
-
-
-        System.out.println("\n--- CPU TEST ---");
-
-        kernel.timerTick();
-        kernel.timerTick();
-        kernel.timerTick();
-
-
-        IOOperation op = new IOOperation(
-                IOType.READ,
-                "test podaci",
-                3
+        FileSystem fs = new FileSystem(
+                (DiskDevice) kernel.getDevice("disk")
         );
 
-        System.out.println("\n--- IO REQUEST ---");
+        System.out.println("\n--- FILE SYSTEM TEST ---");
 
-        kernel.requestIO(
-                p,
-                "disk",
-                op
-        );
+        fs.createDirectory("/home");
 
-        System.out.println("\n--- CPU NAKON BLOKIRANJA ---");
+        fs.createFile("/home/test.txt");
 
-        kernel.timerTick();
-        kernel.timerTick();
+        String data =
+                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        System.out.println("\n--- WRITE ---");
+
+        fs.writeFile("/home/test.txt", data);
+
+        System.out.println("\n--- READ ---");
+
+        String result = fs.readFile("/home/test.txt");
+
+        System.out.println(result);
+
+        System.out.println("\n--- DELETE ---");
+
+        fs.delete("/home/test.txt");
+
+        System.out.println("\n--- RESOLVE NAKON BRISANJA ---");
+
+        FsNode node = fs.resolve("/home/test.txt");
+
+        if (node == null) {
+            System.out.println("Fajl je uspjesno obrisan.");
+        } else {
+            System.out.println("GRESKA: fajl jos postoji.");
+        }
     }
 }
