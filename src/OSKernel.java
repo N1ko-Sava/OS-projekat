@@ -215,6 +215,179 @@ public class OSKernel {
     }
 
 
+    public void executeCommand(String command) {
+
+        if (command == null || command.isBlank()) {
+            return;
+        }
+
+        String[] parts = command.trim().split("\\s+", 3);
+
+        String cmd = parts[0];
+
+        switch (cmd) {
+
+            case "mkdir":
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: mkdir putanja");
+                    return;
+                }
+
+                fileSystem.createDirectory(parts[1]);
+                break;
+
+            case "touch":
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: touch putanja");
+                    return;
+                }
+
+                fileSystem.createFile(parts[1]);
+                break;
+
+            case "write":
+                if (parts.length < 3) {
+                    System.out.println("Upotreba: write putanja tekst");
+                    return;
+                }
+
+                fileSystem.writeFile(parts[1], parts[2]);
+                break;
+
+            case "cat":
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: cat putanja");
+                    return;
+                }
+
+                String content = fileSystem.readFile(parts[1]);
+
+                if (content != null) {
+                    System.out.println(content);
+                } else {
+                    System.out.println("Fajl ne postoji.");
+                }
+
+                break;
+
+            case "rm":
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: rm putanja");
+                    return;
+                }
+
+                fileSystem.delete(parts[1]);
+                break;
+
+            case "ps":
+
+                System.out.println("--- TABELA PROCESA ---");
+
+                for (PCB pcb : processTable) {
+                    System.out.println(
+                            "PID=" + pcb.getPid()
+                                    + " | stanje=" + pcb.getState()
+                                    + " | PC=" + pcb.getProgramCounter()
+                    );
+                }
+
+                break;
+
+
+            case "block":
+
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: block PID");
+                    return;
+                }
+
+                try {
+                    int pid = Integer.parseInt(parts[1]);
+
+                    PCB pcb = findProcess(pid);
+
+                    if (pcb == null) {
+                        System.out.println("Proces PID=" + pid + " ne postoji.");
+                        return;
+                    }
+
+                    if (pcb.getState() == ProcessState.WAITING) {
+                        System.out.println("Proces je vec blokiran.");
+                        return;
+                    }
+
+                    blockProcess(pcb);
+
+                } catch (NumberFormatException e) {
+                    System.out.println("PID mora biti broj.");
+                }
+
+                break;
+
+
+            case "unblock":
+
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: unblock PID");
+                    return;
+                }
+
+                try {
+                    int pid = Integer.parseInt(parts[1]);
+
+                    PCB pcb = findProcess(pid);
+
+                    if (pcb == null) {
+                        System.out.println("Proces PID=" + pid + " ne postoji.");
+                        return;
+                    }
+
+                    if (pcb.getState() != ProcessState.WAITING) {
+                        System.out.println("Proces PID=" + pid + " nije blokiran.");
+                        return;
+                    }
+
+                    unblockProcess(pcb);
+
+                } catch (NumberFormatException e) {
+                    System.out.println("PID mora biti broj.");
+                }
+
+                break;
+
+
+            case "kill":
+
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: kill PID");
+                    return;
+                }
+
+                try {
+                    int pid = Integer.parseInt(parts[1]);
+
+                    PCB pcb = findProcess(pid);
+
+                    if (pcb == null) {
+                        System.out.println("Proces PID=" + pid + " ne postoji.");
+                        return;
+                    }
+
+                    terminateProcess(pcb);
+
+                } catch (NumberFormatException e) {
+                    System.out.println("PID mora biti broj.");
+                }
+
+                break;
+
+            default:
+                System.out.println("Nepoznata komanda: " + cmd);
+
+
+        }
+    }
+
 
 
 

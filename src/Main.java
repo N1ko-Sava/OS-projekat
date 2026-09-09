@@ -5,45 +5,37 @@ public class Main {
         OSKernel kernel = new OSKernel();
         kernel.boot();
 
-        FileSystem fs = new FileSystem(
-                (DiskDevice) kernel.getDevice("disk")
-        );
+        System.out.println("\n--- PROCESI NAKON BOOT-a ---");
+        kernel.executeCommand("ps");
 
-        System.out.println("\n--- FILE SYSTEM TEST ---");
 
-        fs.createDirectory("/home");
+        System.out.println("\n--- POKRENI PRVI PROCES ---");
+        kernel.timerTick();
 
-        fs.createFile("/home/test.txt");
+        kernel.executeCommand("ps");
 
-        String data =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        System.out.println("\n--- WRITE ---");
+        System.out.println("\n--- BLOKIRAJ PID 1 ---");
+        kernel.executeCommand("block 1");
 
-        fs.writeFile("/home/test.txt", data);
+        kernel.executeCommand("ps");
 
-        System.out.println("\n--- READ ---");
 
-        String result = fs.readFile("/home/test.txt");
+        System.out.println("\n--- FCFS UZIMA PID 2 ---");
+        kernel.timerTick();
 
-        System.out.println(result);
+        kernel.executeCommand("ps");
 
-        System.out.println("\n--- DELETE ---");
 
-        fs.delete("/home/test.txt");
+        System.out.println("\n--- ODBLOKIRAJ PID 1 ---");
+        kernel.executeCommand("unblock 1");
 
-        System.out.println("\n--- RESOLVE NAKON BRISANJA ---");
+        kernel.executeCommand("ps");
 
-        FsNode node = fs.resolve("/home/test.txt");
 
-        if (node == null) {
-            System.out.println("Fajl je uspjesno obrisan.");
-        } else {
-            System.out.println("GRESKA: fajl jos postoji.");
-        }
+        System.out.println("\n--- ZAVRSI PID 2 ---");
+        kernel.executeCommand("kill 2");
+
+        kernel.executeCommand("ps");
     }
 }
