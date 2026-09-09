@@ -3,6 +3,8 @@ public class CPU {
     private PCB current;
     private long cycleCount;
 
+    private ZeroAddressAssembler assembler;
+
     public void executeOneStep() {
 
         if (current == null) {
@@ -11,23 +13,81 @@ public class CPU {
         }
 
         if (current.getState() != ProcessState.RUNNING) {
-            System.out.println("CPU: proces PID=" + current.getPid()
-                    + " nije u RUNNING stanju.");
+            System.out.println(
+                    "CPU: PID=" + current.getPid()
+                            + " nije u RUNNING stanju."
+            );
             return;
         }
 
 
-        current.setProgramCounter(current.getProgramCounter() + 1);
+        if (current.getProgram() == null ||
+                current.getProgram().isEmpty()) {
 
+            current.setProgramCounter(
+                    current.getProgramCounter() + 1
+            );
+
+            cycleCount++;
+
+            System.out.println(
+                    "CPU: PID=" + current.getPid()
+                            + " izvrsava instrukciju, PC="
+                            + current.getProgramCounter()
+                            + ", cycle=" + cycleCount
+            );
+
+            return;
+        }
+
+        int pc = current.getProgramCounter();
+
+
+        if (pc >= current.getProgram().size()) {
+
+            current.setState(ProcessState.TERMINATED);
+
+            System.out.println(
+                    "PID=" + current.getPid()
+                            + " je dosao do kraja programa."
+            );
+
+            current = null;
+            return;
+        }
+
+        String instruction =
+                current.getProgram().get(pc);
+
+        System.out.println(
+                "PID=" + current.getPid()
+                        + " | PC=" + pc
+                        + " | " + instruction
+        );
+
+
+        assembler.executeInstruction(
+                current,
+                instruction
+        );
 
         cycleCount++;
 
-        System.out.println(
-                "CPU: PID=" + current.getPid()
-                        + " izvrsava instrukciju, PC="
-                        + current.getProgramCounter()
-                        + ", cycle=" + cycleCount
-        );
+
+        if (current.getState() == ProcessState.TERMINATED) {
+
+            System.out.println(
+                    "CPU: proces PID="
+                            + current.getPid()
+                            + " vise nije aktivan."
+            );
+
+            current = null;
+            return;
+        }
+
+
+        current.setProgramCounter(pc + 1);
     }
 
     public void contextSwitch(PCB next) {
@@ -54,6 +114,7 @@ public class CPU {
     public CPU(PCB current, long cycleCount) {
         this.current = current;
         this.cycleCount = cycleCount;
+        this.assembler = new ZeroAddressAssembler();
     }
 
 

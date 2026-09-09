@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -5,37 +7,24 @@ public class Main {
         OSKernel kernel = new OSKernel();
         kernel.boot();
 
-        System.out.println("\n--- PROCESI NAKON BOOT-a ---");
-        kernel.executeCommand("ps");
+        PCB p = kernel.findProcess(1);
 
+        p.setProgram(Arrays.asList(
+                "PUSH 5",
+                "PUSH 3",
+                "ADD",
+                "PUSH 2",
+                "MUL",
+                "PRINT",
+                "HALT"
+        ));
 
-        System.out.println("\n--- POKRENI PRVI PROCES ---");
-        kernel.timerTick();
+        System.out.println("\n--- NULA-ADRESNI ASEMBLER TEST ---");
 
-        kernel.executeCommand("ps");
+        while (p.getState() != ProcessState.TERMINATED) {
+            kernel.timerTick();
+        }
 
-
-        System.out.println("\n--- BLOKIRAJ PID 1 ---");
-        kernel.executeCommand("block 1");
-
-        kernel.executeCommand("ps");
-
-
-        System.out.println("\n--- FCFS UZIMA PID 2 ---");
-        kernel.timerTick();
-
-        kernel.executeCommand("ps");
-
-
-        System.out.println("\n--- ODBLOKIRAJ PID 1 ---");
-        kernel.executeCommand("unblock 1");
-
-        kernel.executeCommand("ps");
-
-
-        System.out.println("\n--- ZAVRSI PID 2 ---");
-        kernel.executeCommand("kill 2");
-
-        kernel.executeCommand("ps");
+        System.out.println("\n--- KRAJ TESTA ---");
     }
 }
