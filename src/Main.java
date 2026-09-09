@@ -1,4 +1,4 @@
-import java.util.Arrays;
+import java.util.List;
 
 public class Main {
 
@@ -7,24 +7,39 @@ public class Main {
         OSKernel kernel = new OSKernel();
         kernel.boot();
 
-        PCB p = kernel.findProcess(1);
+        kernel.executeCommand("mkdir /home");
+        kernel.executeCommand("touch /home/test.txt");
 
-        p.setProgram(Arrays.asList(
-                "PUSH 5",
-                "PUSH 3",
-                "ADD",
-                "PUSH 2",
-                "MUL",
-                "PRINT",
-                "HALT"
-        ));
+        System.out.println("\n--- WRITE SYSCALL ---");
 
-        System.out.println("\n--- NULA-ADRESNI ASEMBLER TEST ---");
+        kernel.syscall(
+                new Syscall(
+                        SyscallType.WRITE,
+                        List.of(
+                                "/home/test.txt",
+                                "Pozdrav preko syscall-a"
+                        )
+                )
+        );
 
-        while (p.getState() != ProcessState.TERMINATED) {
-            kernel.timerTick();
-        }
+        System.out.println("\n--- READ SYSCALL ---");
 
-        System.out.println("\n--- KRAJ TESTA ---");
+        kernel.syscall(
+                new Syscall(
+                        SyscallType.READ,
+                        List.of("/home/test.txt")
+                )
+        );
+
+        System.out.println("\n--- CREATE PROCESS SYSCALL ---");
+
+        kernel.syscall(
+                new Syscall(
+                        SyscallType.CREATE_PROCESS,
+                        List.of("novi_program", "0")
+                )
+        );
+
+        kernel.executeCommand("ps");
     }
 }

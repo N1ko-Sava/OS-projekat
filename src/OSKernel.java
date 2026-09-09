@@ -392,6 +392,170 @@ public class OSKernel {
 
 
     public void syscall(Syscall request) {
-        // TODO
+
+        if (request == null) {
+            return;
+        }
+
+        switch (request.getType()) {
+
+            case CREATE_PROCESS: {
+
+                if (request.getArgs().isEmpty()) {
+                    System.out.println("CREATE_PROCESS zahtijeva naziv programa.");
+                    return;
+                }
+
+                String programName = request.getArgs().get(0);
+
+                int priority = 0;
+
+                if (request.getArgs().size() > 1) {
+                    try {
+                        priority = Integer.parseInt(
+                                request.getArgs().get(1)
+                        );
+                    } catch (NumberFormatException e) {
+                        System.out.println("Prioritet mora biti broj.");
+                        return;
+                    }
+                }
+
+                createProcess(programName, priority);
+
+                break;
+            }
+
+
+            case EXIT: {
+
+                PCB current = cpu.getCurrent();
+
+                if (current == null) {
+                    System.out.println("Nema aktivnog procesa.");
+                    return;
+                }
+
+                terminateProcess(current);
+
+                break;
+            }
+
+
+            case OPEN: {
+
+                if (request.getArgs().isEmpty()) {
+                    System.out.println("OPEN zahtijeva putanju.");
+                    return;
+                }
+
+                String path = request.getArgs().get(0);
+
+                OpenFileHandle handle =
+                        fileSystem.open(path);
+
+                if (handle == null) {
+                    System.out.println(
+                            "Fajl nije moguce otvoriti: " + path
+                    );
+                    return;
+                }
+
+                PCB current = cpu.getCurrent();
+
+                if (current != null) {
+                    current.getOpenFiles().add(handle);
+                }
+
+                break;
+            }
+
+
+            case READ: {
+
+                if (request.getArgs().isEmpty()) {
+                    System.out.println("READ zahtijeva putanju.");
+                    return;
+                }
+
+                String path = request.getArgs().get(0);
+
+                String data = fileSystem.readFile(path);
+
+                if (data == null) {
+                    System.out.println("Fajl ne postoji: " + path);
+                    return;
+                }
+
+                System.out.println(
+                        "READ " + path + ": " + data
+                );
+
+                break;
+            }
+
+
+            case WRITE: {
+
+                if (request.getArgs().size() < 2) {
+                    System.out.println(
+                            "WRITE zahtijeva putanju i podatke."
+                    );
+                    return;
+                }
+
+                String path = request.getArgs().get(0);
+                String data = request.getArgs().get(1);
+
+                fileSystem.writeFile(path, data);
+
+                break;
+            }
+
+
+            case SLEEP: {
+
+                PCB current = cpu.getCurrent();
+
+                if (current == null) {
+                    System.out.println("Nema aktivnog procesa.");
+                    return;
+                }
+
+                blockProcess(current);
+
+                break;
+            }
+
+
+            case YIELD: {
+
+                /*
+                 * Kod FCFS-a proces se normalno ne prekida
+                 * dok ne zavrsi ili se blokira.
+                 *
+                 * YIELD predstavlja dobrovoljno odricanje CPU-a.
+                 */
+
+                PCB current = cpu.getCurrent();
+
+                if (current == null) {
+                    return;
+                }
+
+                current.setState(ProcessState.READY);
+
+                readyQueue.add(current);
+
+                cpu.setCurrent(null);
+
+                System.out.println(
+                        "Proces PID=" + current.getPid()
+                                + " je dobrovoljno oslobodio CPU."
+                );
+
+                break;
+            }
+        }
     }
 }
