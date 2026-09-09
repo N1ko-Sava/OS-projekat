@@ -13,7 +13,16 @@ public class ReadyQueue {
         queue.add(p);
     }
 
+    public void remove(PCB p) {
+        queue.remove(p);
+    }
+
     public PCB removeNext() {
+
+        if (queue.isEmpty()) {
+            return null;
+        }
+
         return queue.remove();
     }
 

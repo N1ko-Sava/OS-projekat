@@ -52,7 +52,6 @@ public class CPU {
                             + " je dosao do kraja programa."
             );
 
-            current = null;
             return;
         }
 
@@ -82,7 +81,6 @@ public class CPU {
                             + " vise nije aktivan."
             );
 
-            current = null;
             return;
         }
 

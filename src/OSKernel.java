@@ -87,17 +87,27 @@ public class OSKernel {
             return;
         }
 
-        pcb.setState(ProcessState.TERMINATED);
+        // Ukloni proces iz svih redova
+        readyQueue.remove(pcb);
+        blockedQueue.remove(pcb);
 
+        // Ako je trenutno na CPU-u, oslobodi CPU
         if (cpu.getCurrent() == pcb) {
             cpu.setCurrent(null);
         }
 
+        // Oslobodi memoriju
         memoryManager.free(pcb);
 
+        // Oznaci kao zavrsen
+        pcb.setState(ProcessState.TERMINATED);
+
+        // Ako si i ranije brisao iz processTable, ostavi ovo
         processTable.remove(pcb);
 
-        System.out.println("Proces PID=" + pcb.getPid() + " je zavrsen.");
+        System.out.println(
+                "Proces PID=" + pcb.getPid() + " je zavrsen."
+        );
     }
 
 
@@ -152,6 +162,15 @@ public class OSKernel {
 
 
         cpu.executeOneStep();
+
+        PCB current = cpu.getCurrent();
+
+        if (current != null &&
+                current.getState() == ProcessState.TERMINATED) {
+
+            terminateProcess(current);
+        }
+
     }
 
     public void handleIOCompletion(PCB pcb) {
@@ -558,4 +577,16 @@ public class OSKernel {
             }
         }
     }
+
+
+    public void defragmentMemory() {
+
+        System.out.println("--- DEFRAGMENTACIJA MEMORIJE ---");
+
+        memoryManager.defragment();
+
+        System.out.println("Defragmentacija zavrsena.");
+    }
+
+
 }
