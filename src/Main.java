@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -5,94 +7,90 @@ public class Main {
         OSKernel kernel = new OSKernel();
         kernel.boot();
 
+        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("\n==============================");
-        System.out.println("1. KREIRANJE DIREKTORIJUMA");
-        System.out.println("==============================");
+        System.out.println();
+        System.out.println("================================");
+        System.out.println("        OS SIMULATOR");
+        System.out.println("================================");
+        System.out.println("Ukucaj 'help' za listu komandi.");
+        System.out.println("Ukucaj 'exit' za izlaz.");
+        System.out.println();
 
-        kernel.executeCommand("mkdir /programi");
+        while (true) {
 
-        kernel.executeCommand("ls");
+            System.out.print("OS> ");
 
+            String command = scanner.nextLine().trim();
 
-        System.out.println("\n==============================");
-        System.out.println("2. ULAZAK U DIREKTORIJUM");
-        System.out.println("==============================");
+            if (command.isEmpty()) {
+                continue;
+            }
 
-        kernel.executeCommand("cd /programi");
+            if (command.equalsIgnoreCase("exit")) {
+                System.out.println("Gasim OS simulator...");
+                break;
+            }
 
-        kernel.executeCommand("ls");
+            if (command.equalsIgnoreCase("help")) {
+                printHelp();
+                continue;
+            }
 
+            if (command.equalsIgnoreCase("tick")) {
+                kernel.timerTick();
+                continue;
+            }
 
-        System.out.println("\n==============================");
-        System.out.println("3. KREIRANJE PROGRAMSKOG FAJLA");
-        System.out.println("==============================");
+            if (command.equalsIgnoreCase("sstf-test")) {
+                kernel.testSSTF();
+                continue;
+            }
 
-        kernel.executeCommand("touch program.asm");
+            if (command.equalsIgnoreCase("defrag-test")) {
+                kernel.testDefragmentation();
+                continue;
+            }
 
-        kernel.executeCommand("ls");
-
-
-        System.out.println("\n==============================");
-        System.out.println("4. OTVARANJE FAJLA ZA PISANJE");
-        System.out.println("==============================");
-
-        // Potreban nam je RUNNING proces
-        kernel.timerTick();
-
-        kernel.executeCommand(
-                "open program.asm WRITE"
-        );
-
-
-        System.out.println("\n==============================");
-        System.out.println("5. UPIS ASEMBLERSKOG PROGRAMA");
-        System.out.println("==============================");
-
-        kernel.executeCommand(
-                "saveasm program.asm " +
-                        "PUSH 5\\n" +
-                        "PUSH 3\\n" +
-                        "ADD\\n" +
-                        "PUSH 2\\n" +
-                        "MUL\\n" +
-                        "PRINT\\n" +
-                        "HALT"
-        );
-        System.out.println("\n==============================");
-        System.out.println("6. SADRZAJ FAJLA NA DISKU");
-        System.out.println("==============================");
-
-        kernel.executeCommand(
-                "cat program.asm"
-        );
-
-
-        System.out.println("\n==============================");
-        System.out.println("7. POKRETANJE PROGRAMA");
-        System.out.println("==============================");
-
-        kernel.executeCommand(
-                "run program.asm"
-        );
-
-        for (int i = 0; i < 15; i++) {
-            kernel.timerTick();
+            kernel.executeCommand(command);
         }
 
-
-        System.out.println("\n==============================");
-        System.out.println("8. TABELA PROCESA");
-        System.out.println("==============================");
-
-        kernel.executeCommand("ps");
+        scanner.close();
+    }
 
 
-        kernel.testSSTF();
+    private static void printHelp() {
 
+        System.out.println();
+        System.out.println("--- KOMANDE ---");
 
-        System.out.println("\n==============================");
-        System.out.println("KRAJ TESTA");
-        System.out.println("==============================");
+        System.out.println("mkdir <putanja>");
+        System.out.println("touch <putanja>");
+        System.out.println("cd <putanja>");
+        System.out.println("ls");
+
+        System.out.println("write <fajl> <tekst>");
+        System.out.println("cat <fajl>");
+        System.out.println("rm <putanja>");
+
+        System.out.println("open <fajl> READ");
+        System.out.println("open <fajl> WRITE");
+
+        System.out.println("saveasm <fajl> <assembler>");
+        System.out.println("run <fajl>");
+
+        System.out.println("ps");
+        System.out.println("block <pid>");
+        System.out.println("unblock <pid>");
+        System.out.println("kill <pid>");
+
+        System.out.println("tick");
+        System.out.println("sstf-test");
+        System.out.println("defrag-test");
+
+        System.out.println("help");
+        System.out.println("exit");
+
+        System.out.println();
     }
 }

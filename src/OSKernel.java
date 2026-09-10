@@ -1001,5 +1001,35 @@ public class OSKernel {
         System.out.println("--- KRAJ SSTF TESTA ---");
     }
 
+    public void testDefragmentation() {
+
+        System.out.println("\n--- TEST DEFRAGMENTACIJE ---");
+
+        int pidA = createProcess("procA", 0);
+        int pidB = createProcess("procB", 0);
+        int pidC = createProcess("procC", 0);
+
+        PCB a = findProcess(pidA);
+        PCB b = findProcess(pidB);
+        PCB c = findProcess(pidC);
+
+        System.out.println("\nMemorija prije brisanja:");
+        System.out.println(memoryManager.dumpMemory());
+
+        System.out.println("\nBrisem srednji proces PID=" + pidB);
+        terminateProcess(b);
+
+        System.out.println("\nMemorija nakon brisanja:");
+        System.out.println(memoryManager.dumpMemory());
+
+        System.out.println("\nPokrecem defragmentaciju...");
+        memoryManager.defragment();
+
+        System.out.println("\nMemorija nakon defragmentacije:");
+        System.out.println(memoryManager.dumpMemory());
+
+        System.out.println("--- KRAJ TESTA DEFRAGMENTACIJE ---");
+    }
+
 
 }
