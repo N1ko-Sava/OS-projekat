@@ -59,8 +59,6 @@ public class Main {
                         "PRINT\\n" +
                         "HALT"
         );
-
-
         System.out.println("\n==============================");
         System.out.println("6. SADRZAJ FAJLA NA DISKU");
         System.out.println("==============================");
