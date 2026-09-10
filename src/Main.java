@@ -76,12 +76,19 @@ public class Main {
                 "run program.asm"
         );
 
+        for (int i = 0; i < 15; i++) {
+            kernel.timerTick();
+        }
+
 
         System.out.println("\n==============================");
         System.out.println("8. TABELA PROCESA");
         System.out.println("==============================");
 
         kernel.executeCommand("ps");
+
+
+        kernel.testSSTF();
 
 
         System.out.println("\n==============================");

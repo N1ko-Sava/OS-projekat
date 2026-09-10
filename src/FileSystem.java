@@ -889,4 +889,50 @@ public class FileSystem {
             }
         }
     }
+
+    public boolean requestFileRead(
+            String path,
+            PCB process) {
+
+        FsNode node = resolve(path);
+
+        if (!(node instanceof File)) {
+            System.out.println(
+                    "Fajl ne postoji: " + path
+            );
+            return false;
+        }
+
+        if (process == null) {
+            System.out.println(
+                    "Proces nije definisan."
+            );
+            return false;
+        }
+
+        File file = (File) node;
+
+        IOOperation operation =
+                new IOOperation(
+                        IOType.READ,
+                        "",
+                        1,
+                        file.getIndexBlock()
+                );
+
+        System.out.println(
+                "Zahtjev za ucitavanje fajla "
+                        + path
+                        + " sa diska u RAM."
+        );
+
+        disk.startOperation(
+                operation,
+                process
+        );
+
+        return true;
+    }
+
+
 }

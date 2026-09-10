@@ -13,6 +13,8 @@ public class OSKernel {
     private IOManager ioManager;
     private int nextPid;
     private ZeroAddressAssembler assembler;
+    private PCB idleProcess;
+    private PCB systemTask;
 
     public OSKernel() {
         processTable = new ArrayList<>();
@@ -52,8 +54,22 @@ public class OSKernel {
 
         ioManager.addDevice(new DiskDevice("disk"));
 
-        createProcess("idle",0);
-        createProcess("system_task",0);
+        int idlePid = createProcess("idle", 0);
+        int systemPid = createProcess("system_task", 0);
+
+        idleProcess = findProcess(idlePid);
+        systemTask = findProcess(systemPid);
+
+        if (idleProcess != null) {
+            readyQueue.remove(idleProcess);
+            idleProcess.setState(ProcessState.WAITING);
+        }
+
+        if (systemTask != null) {
+            readyQueue.remove(systemTask);
+            systemTask.setState(ProcessState.WAITING);
+        }
+
 
         System.out.println("\t --- OS booted  --- \t");
     }
@@ -523,15 +539,14 @@ public class OSKernel {
                     return;
                 }
 
-                PCB current =
-                        cpu.getCurrent();
+                PCB current = cpu.getCurrent();
 
                 if (current == null) {
+                    current = systemTask;
+                }
 
-                    System.out.println(
-                            "Nema trenutno aktivnog procesa."
-                    );
-
+                if (current == null) {
+                    System.out.println("Nema procesa koji moze otvoriti fajl.");
                     return;
                 }
 
@@ -670,6 +685,39 @@ public class OSKernel {
 
                         return;
                     }
+
+                    boolean readRequested =
+                            fileSystem.requestFileRead(
+                                    programPath,
+                                    process
+                            );
+
+                    if (!readRequested) {
+                        System.out.println(
+                                "Ucitavanje programa sa diska nije uspjelo."
+                        );
+
+                        terminateProcess(process);
+                        return;
+                    }
+
+                    boolean loaded =
+                            memoryManager.loadProgramIntoMemory(
+                                    process,
+                                    binaryCode
+                            );
+
+                    if (!loaded) {
+
+                        System.out.println(
+                                "Program nije mogao biti ucitan u RAM."
+                        );
+
+                        terminateProcess(process);
+
+                        return;
+                    }
+
 
                     List<String> program =
                             new ArrayList<>();
@@ -893,6 +941,64 @@ public class OSKernel {
         memoryManager.defragment();
 
         System.out.println("Defragmentacija zavrsena.");
+    }
+
+
+    public boolean loadProgramIntoMemory(
+            PCB process,
+            String binaryCode) {
+
+        return memoryManager.loadProgramIntoMemory(
+                process,
+                binaryCode
+        );
+    }
+
+    public void testSSTF() {
+
+        System.out.println("\n--- SSTF TEST ---");
+
+        IODevice device = ioManager.getDevice("disk");
+
+        if (!(device instanceof DiskDevice)) {
+            System.out.println("Disk nije pronadjen.");
+            return;
+        }
+
+        // prvo zavrsi eventualne stare zahtjeve
+        while (device.isBusy()) {
+            ioManager.completeIO(device);
+        }
+
+        if (systemTask == null) {
+            System.out.println("System task ne postoji.");
+            return;
+        }
+
+        IOOperation op1 =
+                new IOOperation(IOType.READ, "", 1, 50);
+
+        IOOperation op2 =
+                new IOOperation(IOType.READ, "", 1, 10);
+
+        IOOperation op3 =
+                new IOOperation(IOType.READ, "", 1, 70);
+
+        IOOperation op4 =
+                new IOOperation(IOType.READ, "", 1, 25);
+
+
+        ioManager.requestIO(systemTask, "disk", op1);
+        ioManager.requestIO(systemTask, "disk", op2);
+        ioManager.requestIO(systemTask, "disk", op3);
+        ioManager.requestIO(systemTask, "disk", op4);
+
+
+        while (device.isBusy()) {
+            ioManager.completeIO(device);
+        }
+
+        System.out.println("--- KRAJ SSTF TESTA ---");
     }
 
 

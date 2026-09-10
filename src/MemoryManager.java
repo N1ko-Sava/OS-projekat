@@ -140,4 +140,48 @@ public class MemoryManager {
 
         return sb.toString();
     }
+
+
+    public boolean loadProgramIntoMemory(PCB process, String binaryCode) {
+
+        if (process == null || binaryCode == null) {
+            return false;
+        }
+
+        int base = process.getBaseAddress();
+        int limit = process.getLimit();
+
+        if (binaryCode.length() > limit) {
+
+            System.out.println(
+                    "Program je prevelik za memorijski segment procesa."
+            );
+
+            return false;
+        }
+
+        for (int i = 0; i < binaryCode.length(); i++) {
+
+            ram.write(
+                    base + i,
+                    binaryCode.charAt(i)
+            );
+        }
+
+        System.out.println(
+                "Program PID="
+                        + process.getPid()
+                        + " ucitan u RAM."
+        );
+
+        System.out.println(
+                "RAM opseg: "
+                        + base
+                        + " - "
+                        + (base + binaryCode.length() - 1)
+        );
+
+        return true;
+    }
+
 }
