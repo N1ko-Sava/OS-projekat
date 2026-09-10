@@ -87,22 +87,22 @@ public class OSKernel {
             return;
         }
 
-        // Ukloni proces iz svih redova
+
         readyQueue.remove(pcb);
         blockedQueue.remove(pcb);
 
-        // Ako je trenutno na CPU-u, oslobodi CPU
+
         if (cpu.getCurrent() == pcb) {
             cpu.setCurrent(null);
         }
 
-        // Oslobodi memoriju
+
         memoryManager.free(pcb);
 
-        // Oznaci kao zavrsen
+
         pcb.setState(ProcessState.TERMINATED);
 
-        // Ako si i ranije brisao iz processTable, ostavi ovo
+
         processTable.remove(pcb);
 
         System.out.println(
@@ -400,6 +400,24 @@ public class OSKernel {
 
                 break;
 
+            case "ls":
+
+                fileSystem.listCurrentDirectory();
+
+                break;
+
+
+            case "cd":
+
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: cd putanja");
+                    return;
+                }
+
+                fileSystem.changeDirectory(parts[1]);
+
+                break;
+
             default:
                 System.out.println("Nepoznata komanda: " + cmd);
 
@@ -548,13 +566,6 @@ public class OSKernel {
 
 
             case YIELD: {
-
-                /*
-                 * Kod FCFS-a proces se normalno ne prekida
-                 * dok ne zavrsi ili se blokira.
-                 *
-                 * YIELD predstavlja dobrovoljno odricanje CPU-a.
-                 */
 
                 PCB current = cpu.getCurrent();
 
