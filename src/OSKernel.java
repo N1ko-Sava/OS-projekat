@@ -12,6 +12,7 @@ public class OSKernel {
     private FileSystem fileSystem;
     private IOManager ioManager;
     private int nextPid;
+    private ZeroAddressAssembler assembler;
 
     public OSKernel() {
         processTable = new ArrayList<>();
@@ -22,6 +23,7 @@ public class OSKernel {
 
     public void boot() {
         System.out.println("\t --- Booting OS... --- \t");
+        assembler = new ZeroAddressAssembler();
 
         processTable = new ArrayList<>();
 
@@ -246,40 +248,57 @@ public class OSKernel {
 
         switch (cmd) {
 
-            case "mkdir":
+            case "mkdir": {
+
                 if (parts.length < 2) {
                     System.out.println("Upotreba: mkdir putanja");
                     return;
                 }
 
                 fileSystem.createDirectory(parts[1]);
-                break;
 
-            case "touch":
+                break;
+            }
+
+
+            case "touch": {
+
                 if (parts.length < 2) {
                     System.out.println("Upotreba: touch putanja");
                     return;
                 }
 
                 fileSystem.createFile(parts[1]);
-                break;
 
-            case "write":
+                break;
+            }
+
+
+            case "write": {
+
                 if (parts.length < 3) {
                     System.out.println("Upotreba: write putanja tekst");
                     return;
                 }
 
-                fileSystem.writeFile(parts[1], parts[2]);
-                break;
+                fileSystem.writeFile(
+                        parts[1],
+                        parts[2]
+                );
 
-            case "cat":
+                break;
+            }
+
+
+            case "cat": {
+
                 if (parts.length < 2) {
                     System.out.println("Upotreba: cat putanja");
                     return;
                 }
 
-                String content = fileSystem.readFile(parts[1]);
+                String content =
+                        fileSystem.readFile(parts[1]);
 
                 if (content != null) {
                     System.out.println(content);
@@ -288,21 +307,30 @@ public class OSKernel {
                 }
 
                 break;
+            }
 
-            case "rm":
+
+            case "rm": {
+
                 if (parts.length < 2) {
                     System.out.println("Upotreba: rm putanja");
                     return;
                 }
 
                 fileSystem.delete(parts[1]);
+
                 break;
+            }
 
-            case "ps":
 
-                System.out.println("--- TABELA PROCESA ---");
+            case "ps": {
+
+                System.out.println(
+                        "--- TABELA PROCESA ---"
+                );
 
                 for (PCB pcb : processTable) {
+
                     System.out.println(
                             "PID=" + pcb.getPid()
                                     + " | stanje=" + pcb.getState()
@@ -311,9 +339,10 @@ public class OSKernel {
                 }
 
                 break;
+            }
 
 
-            case "block":
+            case "block": {
 
                 if (parts.length < 2) {
                     System.out.println("Upotreba: block PID");
@@ -321,107 +350,374 @@ public class OSKernel {
                 }
 
                 try {
-                    int pid = Integer.parseInt(parts[1]);
 
-                    PCB pcb = findProcess(pid);
+                    int pid =
+                            Integer.parseInt(parts[1]);
+
+                    PCB pcb =
+                            findProcess(pid);
 
                     if (pcb == null) {
-                        System.out.println("Proces PID=" + pid + " ne postoji.");
+                        System.out.println(
+                                "Proces PID=" + pid + " ne postoji."
+                        );
                         return;
                     }
 
                     if (pcb.getState() == ProcessState.WAITING) {
-                        System.out.println("Proces je vec blokiran.");
+                        System.out.println(
+                                "Proces je vec blokiran."
+                        );
                         return;
                     }
 
                     blockProcess(pcb);
 
                 } catch (NumberFormatException e) {
-                    System.out.println("PID mora biti broj.");
+
+                    System.out.println(
+                            "PID mora biti broj."
+                    );
                 }
 
                 break;
+            }
 
 
-            case "unblock":
+            case "unblock": {
 
                 if (parts.length < 2) {
-                    System.out.println("Upotreba: unblock PID");
+                    System.out.println(
+                            "Upotreba: unblock PID"
+                    );
                     return;
                 }
 
                 try {
-                    int pid = Integer.parseInt(parts[1]);
 
-                    PCB pcb = findProcess(pid);
+                    int pid =
+                            Integer.parseInt(parts[1]);
+
+                    PCB pcb =
+                            findProcess(pid);
 
                     if (pcb == null) {
-                        System.out.println("Proces PID=" + pid + " ne postoji.");
+                        System.out.println(
+                                "Proces PID=" + pid + " ne postoji."
+                        );
                         return;
                     }
 
                     if (pcb.getState() != ProcessState.WAITING) {
-                        System.out.println("Proces PID=" + pid + " nije blokiran.");
+                        System.out.println(
+                                "Proces PID=" + pid + " nije blokiran."
+                        );
                         return;
                     }
 
                     unblockProcess(pcb);
 
                 } catch (NumberFormatException e) {
-                    System.out.println("PID mora biti broj.");
+
+                    System.out.println(
+                            "PID mora biti broj."
+                    );
                 }
 
                 break;
+            }
 
 
-            case "kill":
+            case "kill": {
 
                 if (parts.length < 2) {
-                    System.out.println("Upotreba: kill PID");
+                    System.out.println(
+                            "Upotreba: kill PID"
+                    );
                     return;
                 }
 
                 try {
-                    int pid = Integer.parseInt(parts[1]);
 
-                    PCB pcb = findProcess(pid);
+                    int pid =
+                            Integer.parseInt(parts[1]);
+
+                    PCB pcb =
+                            findProcess(pid);
 
                     if (pcb == null) {
-                        System.out.println("Proces PID=" + pid + " ne postoji.");
+                        System.out.println(
+                                "Proces PID=" + pid + " ne postoji."
+                        );
                         return;
                     }
 
                     terminateProcess(pcb);
 
                 } catch (NumberFormatException e) {
-                    System.out.println("PID mora biti broj.");
+
+                    System.out.println(
+                            "PID mora biti broj."
+                    );
                 }
 
                 break;
+            }
 
-            case "ls":
+
+            case "ls": {
 
                 fileSystem.listCurrentDirectory();
 
                 break;
+            }
 
 
-            case "cd":
+            case "cd": {
 
                 if (parts.length < 2) {
-                    System.out.println("Upotreba: cd putanja");
+                    System.out.println(
+                            "Upotreba: cd putanja"
+                    );
                     return;
                 }
 
-                fileSystem.changeDirectory(parts[1]);
+                fileSystem.changeDirectory(
+                        parts[1]
+                );
 
                 break;
-
-            default:
-                System.out.println("Nepoznata komanda: " + cmd);
+            }
 
 
+            case "open": {
+
+                if (parts.length < 3) {
+                    System.out.println(
+                            "Upotreba: open putanja READ/WRITE"
+                    );
+                    return;
+                }
+
+                String path =
+                        parts[1];
+
+                String modeText =
+                        parts[2].toUpperCase();
+
+                FileMode mode;
+
+                try {
+
+                    mode =
+                            FileMode.valueOf(
+                                    modeText
+                            );
+
+                } catch (IllegalArgumentException e) {
+
+                    System.out.println(
+                            "Mod mora biti READ ili WRITE."
+                    );
+
+                    return;
+                }
+
+                PCB current =
+                        cpu.getCurrent();
+
+                if (current == null) {
+
+                    System.out.println(
+                            "Nema trenutno aktivnog procesa."
+                    );
+
+                    return;
+                }
+
+                OpenFileHandle handle =
+                        fileSystem.openFile(
+                                path,
+                                mode,
+                                current
+                        );
+
+                if (handle != null) {
+
+                    current.getOpenFiles()
+                            .add(handle);
+
+                    System.out.println(
+                            "Fajl otvoren od strane PID="
+                                    + current.getPid()
+                    );
+                }
+
+                break;
+            }
+
+
+            case "saveasm": {
+
+                if (parts.length < 3) {
+                    System.out.println(
+                            "Upotreba: saveasm putanja \"asemblerski kod\""
+                    );
+                    return;
+                }
+
+                String asmPath =
+                        parts[1];
+
+                String sourceCode =
+                        parts[2].replace(
+                                "\\n",
+                                "\n"
+                        );
+
+                try {
+
+                    String binary =
+                            assembler.assemble(
+                                    sourceCode
+                            );
+
+                    System.out.println(
+                            "--- PREVEDENI BINARNI ZAPIS ---"
+                    );
+
+                    System.out.println(
+                            binary
+                    );
+
+                    fileSystem.writeFile(
+                            asmPath,
+                            binary
+                    );
+
+                } catch (Exception e) {
+
+                    System.out.println(
+                            "Greska pri prevodjenju: "
+                                    + e.getMessage()
+                    );
+                }
+
+                break;
+            }
+
+
+            case "run": {
+
+                if (parts.length < 2) {
+                    System.out.println(
+                            "Upotreba: run putanja"
+                    );
+                    return;
+                }
+
+                String programPath =
+                        parts[1];
+
+                String binaryCode =
+                        fileSystem.readFile(
+                                programPath
+                        );
+
+                if (binaryCode == null ||
+                        binaryCode.isBlank()) {
+
+                    System.out.println(
+                            "Program je prazan ili ne postoji."
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    String source =
+                            assembler.disassemble(
+                                    binaryCode
+                            );
+
+                    System.out.println(
+                            "--- UCITAN PROGRAM ---"
+                    );
+
+                    System.out.println(
+                            source
+                    );
+
+                    int pid =
+                            createProcess(
+                                    programPath,
+                                    0
+                            );
+
+                    if (pid == -1) {
+                        return;
+                    }
+
+                    PCB process =
+                            findProcess(pid);
+
+                    if (process == null) {
+
+                        System.out.println(
+                                "Proces nije pronadjen nakon kreiranja."
+                        );
+
+                        return;
+                    }
+
+                    List<String> program =
+                            new ArrayList<>();
+
+                    String[] instructions =
+                            source.split("\\R");
+
+                    for (String instruction :
+                            instructions) {
+
+                        if (!instruction.isBlank()) {
+
+                            program.add(
+                                    instruction.trim()
+                            );
+                        }
+                    }
+
+                    process.setProgram(
+                            program
+                    );
+
+                    System.out.println(
+                            "Program pokrenut kao PID="
+                                    + process.getPid()
+                    );
+
+                } catch (Exception e) {
+
+                    System.out.println(
+                            "Greska pri ucitavanju programa: "
+                                    + e.getMessage()
+                    );
+                }
+
+                break;
+            }
+
+
+            default: {
+
+                System.out.println(
+                        "Nepoznata komanda: "
+                                + cmd
+                );
+
+                break;
+            }
         }
     }
 
