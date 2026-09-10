@@ -134,12 +134,12 @@ public class OSKernel {
             return;
         }
 
-        // Ako je ovaj proces trenutno na CPU-u, ukloni ga
+        readyQueue.remove(pcb);
+
         if (cpu.getCurrent() == pcb) {
             cpu.setCurrent(null);
         }
 
-        // Prebaci proces u BlockedQueue
         blockedQueue.block(pcb);
 
         System.out.println(
@@ -505,6 +505,25 @@ public class OSKernel {
                 break;
             }
 
+            case "create": {
+
+                if (parts.length < 2) {
+                    System.out.println("Upotreba: create <ime>");
+                    break;
+                }
+
+                String name = parts[1];
+
+                int pid = createProcess(name, 0);
+
+                if (pid != -1) {
+                    System.out.println(
+                            "Kreiran korisnicki proces PID=" + pid
+                    );
+                }
+
+                break;
+            }
 
             case "open": {
 

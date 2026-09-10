@@ -79,6 +79,8 @@ public class Main {
         System.out.println("saveasm <fajl> <assembler>");
         System.out.println("run <fajl>");
 
+        System.out.println("create <ime>");
+
         System.out.println("ps");
         System.out.println("block <pid>");
         System.out.println("unblock <pid>");
