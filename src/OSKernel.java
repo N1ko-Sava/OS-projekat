@@ -357,6 +357,18 @@ public class OSKernel {
                 break;
             }
 
+            case "mem": {
+                System.out.println(memoryManager.dumpMemory());
+                break;
+            }
+
+            case "defrag": {
+                memoryManager.defragment();
+                System.out.println("Defragmentacija zavrsena.");
+                System.out.println(memoryManager.dumpMemory());
+                break;
+            }
+
 
             case "block": {
 
